@@ -7,7 +7,7 @@ interviews with AWS and GCP implementations, data-platform design, SRE / DevOps 
 Everything is generic — usable for any company.
 
 ## Put it on your iPhone
-1. Open **https://sudiptoimpmail.github.io/interview-prep/** in **Safari**.
+1. Open **https://sudiptoimpmail.github.io/inprep/** in **Safari**.
 2. Tap **Share** → **Add to Home Screen** → **Add**.
 3. Open it from the home screen. It runs full-screen and works offline after the first open.
 
