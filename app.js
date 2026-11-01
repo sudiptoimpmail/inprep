@@ -245,10 +245,12 @@
     var back = scope === 'q' ? '#q/' + encodeURIComponent(window._lastQ || '') : '#d/' + (scope || c.deck);
     var h = '<div class="study">' + bar((i + 1) + ' of ' + list.length, backBtn(back, 'Back'), '');
     h += '<div class="stage">' + cardHTML(c, true) + '</div>';
-    h += '<div class="actions two"><button class="grade nav" data-go="' + (i > 0 ? '#c/' + list[i - 1] + '/' + (scope || c.deck) : back) + '">‹ Previous</button><button class="grade nav" data-go="' + (i < list.length - 1 ? '#c/' + list[i + 1] + '/' + (scope || c.deck) : back) + '">Next ›</button></div></div>';
+    var sc = scope || c.deck;
+    var prev = i > 0 ? '#c/' + list[i - 1] + '/' + sc : null, next = i < list.length - 1 ? '#c/' + list[i + 1] + '/' + sc : null;
+    h += '<div class="swipe-hint">' + (prev ? '‹ swipe right for previous' : 'first card') + '<span>·</span>' + (next ? 'swipe left for next ›' : 'last card') + '</div></div>';
     app.innerHTML = h;
     document.getElementById('back').appendChild(renderBack(c.b));
-    session = { single: true, id: id };
+    session = { single: true, id: id, prev: prev, next: next };
     bindCard();
   }
 
@@ -308,17 +310,25 @@
       if (fg && fg.querySelector('svg')) { openZoom(fg); return; }
       if (session && !session.single && !session.revealed) { session.revealed = true; drawStudy(); }
     });
-    if (!session || session.single) return;
-    card.addEventListener('touchstart', function (e) { if (!session.revealed || e.target.closest('.tw,pre,figure')) return; var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; dx = 0; dragging = true; decided = false; horiz = false; card.style.transition = 'none'; }, { passive: true });
+    if (!session) return;
+    var single = !!session.single;
+    card.addEventListener('touchstart', function (e) { if ((!single && !session.revealed) || e.target.closest('.tw,pre,figure')) return; var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; dx = 0; dragging = true; decided = false; horiz = false; card.style.transition = 'none'; }, { passive: true });
     card.addEventListener('touchmove', function (e) {
       if (!dragging) return; var t = e.touches[0]; var ddx = t.clientX - x0, ddy = t.clientY - y0;
       if (!decided && (Math.abs(ddx) > 10 || Math.abs(ddy) > 10)) { decided = true; horiz = Math.abs(ddx) > Math.abs(ddy) * 1.3; }
       if (!horiz) return;
+      if (single) { if ((dx > 0 && !session.prev) || (dx < 0 && !session.next)) ddx = ddx / 4; dx = ddx; card.style.transform = 'translateX(' + dx + 'px)'; return; }
       dx = ddx; card.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 30) + 'deg)';
       tl.style.opacity = dx < -30 ? Math.min(1, -dx / 100) : 0; tr.style.opacity = dx > 30 ? Math.min(1, dx / 100) : 0;
     }, { passive: true });
     card.addEventListener('touchend', function () {
       if (!dragging) return; dragging = false; card.style.transition = '';
+      if (single) {
+        var tgt = horiz && Math.abs(dx) > 70 ? (dx < 0 ? session.next : session.prev) : null;
+        if (tgt) { card.style.transform = 'translateX(' + (dx < 0 ? '-110%' : '110%') + ')'; card.style.opacity = '0'; setTimeout(function () { location.replace(tgt); }, 160); }
+        else card.style.transform = '';
+        return;
+      }
       if (horiz && Math.abs(dx) > 90) { card.style.transform = ''; answer(dx > 0 ? 'good' : 'again'); }
       else { card.style.transform = ''; tl.style.opacity = 0; tr.style.opacity = 0; }
     });
@@ -362,7 +372,8 @@
     }
   });
   document.addEventListener('keydown', function (e) {
-    if (!session || session.single || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (!session || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (session.single) { if (e.key === 'ArrowLeft' && session.prev) location.replace(session.prev); else if (e.key === 'ArrowRight' && session.next) location.replace(session.next); return; }
     if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!session.revealed) { session.revealed = true; drawStudy(); } else answer('good'); }
     else if (session.revealed && e.key === '1') answer('again');
     else if (session.revealed && e.key === '2') answer('good');
