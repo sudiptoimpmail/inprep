@@ -289,16 +289,27 @@
   }
 
   // ---------- gestures on the study card ----------
+  function openZoom(fg) {
+    var svg = fg.querySelector('svg'), vb = (svg.getAttribute('viewBox') || svg.getAttribute('viewbox') || '0 0 720 360').split(/[\s,]+/);
+    var w = Math.max(Math.round((+vb[2] || 720) * 0.8), window.innerWidth - 24);
+    var z = document.createElement('div'); z.className = 'zoom';
+    var cap = fg.querySelector('figcaption');
+    z.innerHTML = '<div class="zoom-bar"><span>' + (cap ? esc(cap.textContent) : 'Diagram') + '</span><button aria-label="Close">Done</button></div><div class="zoom-body"><div class="zoom-fig" style="width:' + w + 'px">' + svg.outerHTML + '</div><p class="zoom-hint">Scroll sideways. Turn the phone sideways for a bigger view.</p></div>';
+    z.querySelector('button').addEventListener('click', function () { z.remove(); });
+    document.body.appendChild(z);
+  }
   function bindCard() {
     var card = document.getElementById('card'); if (!card) return;
     var x0 = 0, y0 = 0, dx = 0, dragging = false, decided = false, horiz = false;
     var tl = card.querySelector('.swipe-tag.l'), tr = card.querySelector('.swipe-tag.r');
     card.addEventListener('click', function (e) {
       if (e.target.closest('[data-act="star"]') || e.target.closest('a,summary,details')) return;
+      var fg = e.target.closest('.content figure');
+      if (fg && fg.querySelector('svg')) { openZoom(fg); return; }
       if (session && !session.single && !session.revealed) { session.revealed = true; drawStudy(); }
     });
     if (!session || session.single) return;
-    card.addEventListener('touchstart', function (e) { if (!session.revealed) return; var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; dx = 0; dragging = true; decided = false; horiz = false; card.style.transition = 'none'; }, { passive: true });
+    card.addEventListener('touchstart', function (e) { if (!session.revealed || e.target.closest('.tw,pre,figure')) return; var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; dx = 0; dragging = true; decided = false; horiz = false; card.style.transition = 'none'; }, { passive: true });
     card.addEventListener('touchmove', function (e) {
       if (!dragging) return; var t = e.touches[0]; var ddx = t.clientX - x0, ddy = t.clientY - y0;
       if (!decided && (Math.abs(ddx) > 10 || Math.abs(ddy) > 10)) { decided = true; horiz = Math.abs(ddx) > Math.abs(ddy) * 1.3; }

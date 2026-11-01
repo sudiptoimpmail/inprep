@@ -1,9 +1,9 @@
 # Interview Prep — flashcards
 
 A phone app for engineering-manager and architecture interviews, built from my full prep book:
-**1,144 cards in 45 decks** — story bank (STAR), leadership principles, 60-second answers to reported manager questions,
+**2,370 cards in 54 decks** — story bank (STAR), leadership principles, 60-second answers to reported manager questions,
 the engineering-manager question bank, system-design method and numbers, **100 system-design questions** worked as mock
-interviews with AWS and GCP implementations, data-platform design, SRE / DevOps / Agile, AWS and GCP, data & AI, and a glossary.
+interviews with AWS and GCP implementations, data-platform design, SRE / DevOps / Agile, AWS and GCP, data & AI, a glossary, and nine chapters of the Engineering Leadership book (systems thinking, large-scale design, event-driven, cloud-native, SRE, hiring, org design, performance, system-design playbook). Long answers are split into phone-sized parts.
 Everything is generic — usable for any company.
 
 ## Put it on your iPhone
